@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, User, Mail, Phone, Calendar, MapPin } from 'lucide-react';
 import './Register.css';
+import { auth } from '../firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function LoginModal({ isOpen, onClose, onLogin }) {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -35,12 +37,10 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (isRegistering) {
-      // Registration logic with validation
-      setError({ message: '', field: '' });
+    setError({ message: '', field: '' });
 
-      // Validation
+    if (isRegistering) {
+      // Validation (same as before)
       for (const key in formData) {
         if (Object.prototype.hasOwnProperty.call(formData, key) && String(formData[key]).trim() === '') {
           setError({ message: 'Please fill in all required fields.', field: key });
@@ -64,46 +64,43 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
         setError({ message: 'Passwords do not match.', field: 'confirmPassword' });
         return;
       }
-      const phoneRegex = /^(91)?[0-9]{10}$/;
-      if (!phoneRegex.test(formData.phone)) {
-        setError({ message: 'Please enter a valid 10 or 12-digit phone number.', field: 'phone' });
-        return;
-      }
-      
-      // API call
-      const { confirmPassword, ...submissionData } = formData;
 
       try {
-        const response = await fetch('/api/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(submissionData),
-        });
+        // ✅ Firebase Registration
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        const user = userCredential.user;
 
-        const result = await response.json();
-
-        if (!response.ok) {
-          setError({ message: result.message || 'An error occurred.', field: '' });
-        } else {
-          alert('Registration Successful! A confirmation email has been sent.');
-          onClose();
-        }
-      } catch (networkError) {
-        setError({ message: 'Could not connect to the server. Please try again later.', field: '' });
+        alert('Registration successful! You can now log in.');
+        setIsRegistering(false);
+      } catch (err) {
+        console.error(err);
+        setError({ message: err.message || 'Registration failed.', field: '' });
       }
+
     } else {
-      // Login logic (simplified)
-      onLogin({
-        username: 'John Doe',
-        email: formData.email,
-        phone: '+1 (555) 987-6543',
-        usn: '01JST21CS001',
-        branch: 'Computer Science and Engineering',
-        section: 'A'
-      });
-      onClose();
+      // ✅ Firebase Login
+      if (!formData.email || !formData.password) {
+        setError({ message: 'Please enter both email and password.', field: 'email' });
+        return;
+      }
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        const user = userCredential.user;
+
+        onLogin({
+          username: user.displayName || formData.username || 'User',
+          email: user.email,
+          usn: formData.usn || '',
+          branch: formData.branch || '',
+          section: formData.section || '',
+          phone: formData.phone || '',
+        });
+        onClose();
+      } catch (err) {
+        console.error(err);
+        setError({ message: 'Invalid email or password.', field: '' });
+      }
     }
   };
 
