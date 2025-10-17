@@ -20,10 +20,45 @@ const ChatbotHub = () => {
   const sendMessage = () => {
     if (!input.trim()) return;
 
-    // Add user message
-    setMessages(prev => ({
+    // Add user message with marks info for examprep
+    const userMessage = activeMode === "examprep"
+      ? `${input} (${selectedMarks} marks)`
+      : input;
+
+    setIsTyping(true);
+
+const endpoint = "http://127.0.0.1:8000/ask"; // your FastAPI server URL
+
+const payload = {
+  question: input,
+  marks: activeMode === "examprep" ? selectedMarks : 5,
+};
+
+fetch(endpoint, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
+})
+  .then(async (res) => {
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error from server");
+    }
+    return res.json();
+  })
+  .then((data) => {
+    setMessages((prev) => ({
       ...prev,
-      [activeMode]: [...prev[activeMode], { type: "user", text: input }]
+      [activeMode]: [...prev[activeMode], { type: "bot", text: data.answer }],
+    }));
+  })
+  .catch((error) => {
+    setMessages((prev) => ({
+      ...prev,
+      [activeMode]: [
+        ...prev[activeMode],
+        { type: "bot", text: `⚠️ Error: ${error.message}` },
+      ],
     }));
   })
   .finally(() => setIsTyping(false));
