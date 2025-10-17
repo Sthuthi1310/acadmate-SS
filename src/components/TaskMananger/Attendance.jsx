@@ -12,6 +12,10 @@ import "./AttendanceTracker.css";
  *   DELETE {API_URL}/attendance/:userId/:subject      -> remove all sessions for a subject (optional)
  */
 
+import React, { useState, useEffect } from 'react';
+import './AttendanceTracker.css';
+
+
 const AttendanceTracker = ({ onBack }) => {
   // Config
   const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
