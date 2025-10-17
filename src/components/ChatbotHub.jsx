@@ -20,17 +20,14 @@ const ChatbotHub = () => {
   const sendMessage = () => {
     if (!input.trim()) return;
 
-    // Add user message with marks info for examprep
-    const userMessage = activeMode === "examprep"
-      ? `${input} (${selectedMarks} marks)`
-      : input;
-
+    // Add user message
     setMessages(prev => ({
       ...prev,
-      [activeMode]: [...prev[activeMode], { type: "user", text: userMessage }]
+      [activeMode]: [...prev[activeMode], { type: "user", text: input }]
     }));
-    setInput("");
-    setIsTyping(true);
+  })
+  .finally(() => setIsTyping(false));
+
 
     // Integrate your unified ChatbotHub AI API here based on `activeMode`:
     // Example structure (replace setTimeout with real calls):
