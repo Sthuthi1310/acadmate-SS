@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import './AttendanceTracker.css';
 
+
 const AttendanceTracker = ({ onBack }) => {
   // CSS moved to AttendanceTracker.css file
 
