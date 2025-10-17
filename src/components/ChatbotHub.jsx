@@ -57,12 +57,11 @@ fetch(endpoint, {
       ...prev,
       [activeMode]: [
         ...prev[activeMode],
-        { type: "bot", text: `⚠️ Error: ${error.message}` },
+        { type: "bot", text:  `Error: ${error.message}` },
       ],
     }));
   })
   .finally(() => setIsTyping(false));
-
 
     // Integrate your unified ChatbotHub AI API here based on `activeMode`:
     // Example structure (replace setTimeout with real calls):

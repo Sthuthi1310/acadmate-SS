@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Linkedin, Github } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
@@ -13,16 +13,18 @@ import StudyMaterials from './components/StudyMaterials.jsx'; // Study Materials
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const [activeSection, setActiveSection] = useState('Home');
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
-  // Persistent login: read from localStorage
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("token"));
-  const [userData, setUserData] = useState(() => {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
+  const [activeSection, setActiveSection] = useState(() => {
+    // Initialize from history state -> location.hash -> default 'Home'
+    try {
+      const stateSection = window.history.state && window.history.state.section;
+      if (stateSection) return stateSection;
+    } catch {}
+    const hash = window.location.hash && window.location.hash.replace('#', '');
+    return hash || 'Home';
   });
-
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
 
   // Team members
@@ -66,19 +68,19 @@ function App() {
     setUserData(data);
     setIsLoggedIn(true);
     setIsLoginModalOpen(false);
-
-    // Persist login
-    localStorage.setItem("token", data.token || "persisted"); // adjust if your API sends a token
-    localStorage.setItem("user", JSON.stringify(data));
+    setShowProfile(false);
+    setActiveSection('Home');
+    try { window.history.pushState({ section: 'Home' }, '', '#Home'); } catch {}
   };
-
   const handleShowProfile = () => {
     setShowProfile(true);
     setActiveSection('Profile');
+    try { window.history.pushState({ section: 'Profile' }, '', '#Profile'); } catch {}
   };
   const handleBackToHome = () => {
     setShowProfile(false);
     setActiveSection('Home');
+    try { window.history.pushState({ section: 'Home' }, '', '#Home'); } catch {}
   };
 
   const handleLogout = () => {
@@ -86,19 +88,50 @@ function App() {
     setUserData(null);
     setShowProfile(false);
     setActiveSection('Home');
-
-    // Clear persisted login
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    try { window.history.pushState({ section: 'Home' }, '', '#Home'); } catch {}
   };
 
   const handleSectionChange = (section) => {
-    if (section !== 'Profile') setShowProfile(false);
+    // Reset showProfile when navigating to any section other than Profile
+    if (section !== 'Profile') {
+      setShowProfile(false);
+    }
     setActiveSection(section);
+    // Push into browser history so back/forward works
+    try { window.history.pushState({ section }, '', `#${section.replace(/\s+/g, '')}`); } catch {}
   };
+
+  // Listen for browser back/forward (popstate) and update app state accordingly
+  useEffect(() => {
+    const onPop = (e) => {
+      const stateSection = (e.state && e.state.section) || (window.location.hash && window.location.hash.replace('#', '')) || 'Home';
+      // If the section is Profile but user is not logged in, open login flow instead
+      if (stateSection === 'Profile' && !isLoggedIn) {
+        setActiveSection('Home');
+        setShowProfile(false);
+        return;
+      }
+      // Maintain showProfile flag when appropriate
+      if (stateSection === 'Profile') setShowProfile(true);
+      else setShowProfile(false);
+      setActiveSection(stateSection);
+    };
+
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [isLoggedIn]);
+
+  // Ensure initial history state matches the current activeSection
+  useEffect(() => {
+    try {
+      const safeHash = `${activeSection}`.replace(/\s+/g, '');
+      window.history.replaceState({ section: activeSection }, '', `#${safeHash}`);
+    } catch {}
+  }, []);
 
   // Main content renderer
   const renderContent = () => {
+    // If showProfile is true, show profile regardless of activeSection
     if (showProfile && userData) {
       return (
         <ProtectedRoute 
@@ -122,6 +155,7 @@ function App() {
             </ProtectedRoute>
           );
         } else {
+          // If trying to access profile without user data, show authentication required
           return (
             <ProtectedRoute 
               isAuthenticated={isLoggedIn} 
@@ -133,39 +167,63 @@ function App() {
         }
       case 'Home': 
         return <Home onSectionChange={handleSectionChange} isLoggedIn={isLoggedIn} onLoginRequired={() => setIsLoginModalOpen(true)} />;
+      
       case 'Seniors': 
         return (
-          <ProtectedRoute isAuthenticated={isLoggedIn} onLoginRequired={() => setIsLoginModalOpen(true)}>
+          <ProtectedRoute 
+            isAuthenticated={isLoggedIn} 
+            onLoginRequired={() => setIsLoginModalOpen(true)}
+          >
             <SeniorsPage onBackToHome={handleBackToHome} />
           </ProtectedRoute>
         );
+      
       case 'TaskManager': 
         return (
-          <ProtectedRoute isAuthenticated={isLoggedIn} onLoginRequired={() => setIsLoginModalOpen(true)}>
+          <ProtectedRoute 
+            isAuthenticated={isLoggedIn} 
+            onLoginRequired={() => setIsLoginModalOpen(true)}
+          >
             <Task />
           </ProtectedRoute>
         );
+      
       case 'EventBuddy': 
         return (
-          <ProtectedRoute isAuthenticated={isLoggedIn} onLoginRequired={() => setIsLoginModalOpen(true)}>
+          <ProtectedRoute 
+            isAuthenticated={isLoggedIn} 
+            onLoginRequired={() => setIsLoginModalOpen(true)}
+          >
             <CalendarPage />
           </ProtectedRoute>
         );
+      
       case 'Chatbot':
         return (
-          <ProtectedRoute isAuthenticated={isLoggedIn} onLoginRequired={() => setIsLoginModalOpen(true)}>
+          <ProtectedRoute 
+            isAuthenticated={isLoggedIn} 
+            onLoginRequired={() => setIsLoginModalOpen(true)}
+          >
             <ChatbotHub />
           </ProtectedRoute>
         );
+      
       case 'Study Materials':
         return (
-          <ProtectedRoute isAuthenticated={isLoggedIn} onLoginRequired={() => setIsLoginModalOpen(true)}>
+          <ProtectedRoute 
+            isAuthenticated={isLoggedIn} 
+            onLoginRequired={() => setIsLoginModalOpen(true)}
+          >
             <StudyMaterials user={userData} onLogout={handleLogout} />
           </ProtectedRoute>
         );
+      
       case 'About Us':
         return (
-          <ProtectedRoute isAuthenticated={isLoggedIn} onLoginRequired={() => setIsLoginModalOpen(true)}>
+          <ProtectedRoute 
+            isAuthenticated={isLoggedIn} 
+            onLoginRequired={() => setIsLoginModalOpen(true)}
+          >
             <div className="min-h-screen custom-beige py-12 px-4">
               <div className="max-w-7xl mx-auto text-center">
                 <p className="text-lg custom-brown opacity-90 max-w-3xl mx-auto leading-relaxed">
@@ -217,6 +275,7 @@ function App() {
             </div>
           </ProtectedRoute>
         );
+      
       default:
         return <Home onSectionChange={handleSectionChange} isLoggedIn={isLoggedIn} onLoginRequired={() => setIsLoginModalOpen(true)} />;
     }

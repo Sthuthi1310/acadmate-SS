@@ -26,14 +26,19 @@ const GradePredictor = ({ onBack }) => {
 
     .grade-header {
       margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
     }
 
     .grade-title {
       margin: 0;
       color: var(--brown);
-      font-size: 2.5rem;
-      font-weight: 700;
+      font-size: 3rem; /* increased size */
+      font-weight: 800;
       text-align: center;
+      letter-spacing: 0.5px;
     }
 
     .back-arrow-btn {
@@ -118,6 +123,23 @@ const GradePredictor = ({ onBack }) => {
       outline: none;
       border-color: var(--accent);
       box-shadow: 0 0 0 2px #f4b30c;
+    }
+
+    /* Grade icon sizing (inline styles to guarantee precedence) */
+    .grade-icon {
+      width: 36px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+      border: 2px solid rgba(78,205,196,0.12);
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0 0.5rem 0 0;
+    }
+
+    @media (max-width: 640px) {
+      .grade-icon { width: 28px; height: 28px; }
     }
 
     .grade-input::placeholder {
@@ -322,6 +344,9 @@ const GradePredictor = ({ onBack }) => {
         gap: 1rem;
         text-align: center;
       }
+      .grade-title {
+        font-size: 1.8rem;
+      }
     }
   `;
 
@@ -389,9 +414,10 @@ const GradePredictor = ({ onBack }) => {
       <button className="back-arrow-btn" onClick={onBack} title="Go Back">
         ←
       </button>
-      
-      <h2 className="grade-title">📊 GradeGenie</h2>
-
+      <div className="grade-header">
+        <img src={'/grade.jpg'} alt="grade" className="grade-icon" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/grade.jpg'; }} />
+        <h2 className="grade-title">GradeGenie</h2>
+      </div>
       <div className="grade-content">
         {/* CIE Input Section */}
         <div className="cie-section">
