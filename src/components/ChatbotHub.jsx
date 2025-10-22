@@ -7,7 +7,7 @@ import { ExamPrepCard } from "./ExamPrep";
 const ChatbotHub = () => {
   const [activeMode, setActiveMode] = useState("eduboat");
   const [messages, setMessages] = useState({
-    quickhelp: [{ type: "bot", text: "Welcome to QuickHelp! Get instant explanations ⚡" }],
+    quickhelp: [{ type: "bot", text: "Welcome to QuickHelp!! Get instant explanations ⚡" }],
     examprep: [{ type: "bot", text: "Welcome to ExamPrep! Get exam-ready answers ✍️" }],
     deepdive: [{ type: "bot", text: "Welcome to DeepDive! Explore concepts thoroughly 🌊" }]
   });
