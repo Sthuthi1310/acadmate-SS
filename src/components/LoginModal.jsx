@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { X, User, Mail, Phone, Calendar, MapPin } from 'lucide-react';
 import './Register.css';
-import { auth } from '../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function LoginModal({ isOpen, onClose, onLogin }) {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -41,9 +39,12 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (isRegistering) {
-      // Validation (same as before)
+      // Registration logic with validation
+      setError({ message: '', field: '' });
+
+      // Validation
       for (const key in formData) {
         if (Object.prototype.hasOwnProperty.call(formData, key) && String(formData[key]).trim() === '') {
           setError({ message: 'Please fill in all required fields.', field: key });
@@ -67,26 +68,12 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
         setError({ message: 'Passwords do not match.', field: 'confirmPassword' });
         return;
       }
-
-      try {
-        // ✅ Firebase Registration
-        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-        const user = userCredential.user;
-
-        alert('Registration successful! You can now log in.');
-        setIsRegistering(false);
-      } catch (err) {
-        console.error(err);
-        setError({ message: err.message || 'Registration failed.', field: '' });
-      }
-
-    } else {
-      // ✅ Firebase Login
-      if (!formData.email || !formData.password) {
-        setError({ message: 'Please enter both email and password.', field: 'email' });
+      const phoneRegex = /^(91)?[0-9]{10}$/;
+      if (!phoneRegex.test(formData.phone)) {
+        setError({ message: 'Please enter a valid 10 or 12-digit phone number.', field: 'phone' });
         return;
       }
-      
+
       // API call
       const { confirmPassword, ...submissionData } = formData;
 
