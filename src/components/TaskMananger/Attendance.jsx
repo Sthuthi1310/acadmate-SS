@@ -244,7 +244,10 @@ const AttendanceTracker = ({ onBack }) => {
         ←
       </button>
       
-      <h2 className="attendance-title">📋 Attendance Tracker</h2>
+      <h2 className="attendance-title">
+        <img src={'/attend.jpg'} alt="Attendance" className="attendance-icon" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/attend.jpg'; }} />
+        Attendance Tracker
+      </h2>
       {showUndo && <button className="btn undo-btn" onClick={undoLastAction}>↶ Undo Last Action</button>}
 
       <div className="upload-section">

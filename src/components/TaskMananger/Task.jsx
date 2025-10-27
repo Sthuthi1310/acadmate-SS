@@ -153,6 +153,14 @@ function Task() {
       justify-content: center;
     }
 
+    .home-attend-icon {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 10px;
+      display: block;
+    }
+
     .cute-tab:hover .tab-icon {
       transform: scale(1.2) rotate(8deg);
       filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
@@ -654,7 +662,7 @@ function Task() {
           
           {/* Attendify Card - Navigate to attendance tracking tool */}
           <div className="cute-tab tab2" onClick={() => setCurrentPage('attendance')}>
-            <div className="tab-icon attendance-icon">📊</div>
+            <div className="tab-icon attendance-icon"><img src={'/attend.jpg'} alt="Attend" className="home-attend-icon" onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src='/attend.jpg'}}/></div>
             <div className="tab-title">Attendify</div>
             <div className="tab-desc">Track your class attendance percentage</div>
             <div className="tab-glow"></div>

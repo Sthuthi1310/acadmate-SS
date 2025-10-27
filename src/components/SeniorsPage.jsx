@@ -11,10 +11,7 @@ import {
 import SeniorsProfiles from "./SeniorsProfiles.jsx";
 
 const SeniorsPage = ({ onBackToHome }) => {
-  const bannedWords = [
-  "fuck", "shit", "bitch", "asshole", "dick", "pussy",
-  "slut", "whore", "fag", "retard", "nigger",
-  "suicide", "kill", "die", "rape", "porn",
+  const bannedWords = ["none","nothing"
 ];
 
 

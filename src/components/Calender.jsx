@@ -58,7 +58,12 @@ const Calendar = ({ onBack }) => {
 
   return (
     <div className="calendar-container">
-      <h2 className="calendar-title">📅 EventBuddy</h2>
+  <h2 className="calendar-title">
+   {/* prefer public asset if available */}
+  <img src={'/calendar.png'} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src='/logo.png'}} alt="EventBuddy Icon" className="calendar-icon" />
+   EventBuddy
+  </h2>
+
 
       {notification && <div className="notification">{notification}</div>}
 
